@@ -58,13 +58,17 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
     galleryImages: post.galleryImages || "[]",
     destination: post.destination || "Merzouga Dunes",
     country: post.country || "Morocco",
-    travelDate: post.travelDate ? post.travelDate.toISOString() : null,
+    travelDate: post.travelDate
+      ? typeof post.travelDate === "string"
+        ? post.travelDate
+        : post.travelDate.toISOString()
+      : null,
     readingTime: post.readingTime || 5,
-    category: { name: post.category.name },
+    category: { name: post.category?.name || "Expedition" },
     author: {
-      name: post.author.name,
-      avatar: post.author.avatar || "",
-      bio: post.author.bio || "",
+      name: post.author?.name || "Editorial Curator",
+      avatar: post.author?.avatar || "",
+      bio: post.author?.bio || "",
     },
   };
 
@@ -78,15 +82,20 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
     galleryImages: p.galleryImages || "[]",
     destination: p.destination || "Merzouga Dunes",
     country: p.country || "Morocco",
-    travelDate: p.travelDate ? p.travelDate.toISOString() : null,
+    travelDate: p.travelDate
+      ? typeof p.travelDate === "string"
+        ? p.travelDate
+        : p.travelDate.toISOString()
+      : null,
     readingTime: p.readingTime || 5,
-    category: { name: p.category.name },
+    category: { name: p.category?.name || "Expedition" },
     author: {
-      name: p.author.name,
-      avatar: p.author.avatar || "",
-      bio: p.author.bio || "",
+      name: p.author?.name || "Editorial Curator",
+      avatar: p.author?.avatar || "",
+      bio: p.author?.bio || "",
     },
   }));
+
 
   return <JournalReadingExperience post={formattedPost} allPosts={formattedAllPosts} />;
 }
