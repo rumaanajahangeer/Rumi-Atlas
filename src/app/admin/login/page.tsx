@@ -8,10 +8,11 @@ import { Lock, Mail, Sparkles, ArrowRight } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@rumiatlas.com");
-  const [password, setPassword] = useState("rumiatlas2026");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,13 +107,8 @@ export default function AdminLoginPage() {
             <span>{loading ? "Authenticating..." : "Unlock Dashboard"}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-
-          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-[11px] text-[#A78BFA] text-center space-y-1">
-            <span className="text-[#FDE047] font-semibold block uppercase tracking-wider">Default Studio Credentials</span>
-            <p>Email: <code className="text-white font-mono">admin@rumiatlas.com</code></p>
-            <p>Password: <code className="text-white font-mono">rumiatlas2026</code></p>
-          </div>
         </form>
+
 
       </div>
     </div>

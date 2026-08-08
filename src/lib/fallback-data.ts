@@ -88,8 +88,41 @@ export const FALLBACK_POSTS: FallbackPost[] = [
     `,
     featuredImage: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1600&q=80",
     galleryImages: JSON.stringify([
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80",
+      {
+        dayNumber: "Day 1",
+        title: "Arriving at the Golden Dunes of Merzouga",
+        story: "We arrived at the edge of the Sahara as dusk began to painterly tint the sky in hues of deep violet and dusty rose. The air was crisp, scented with woodfire smoke and dry earth.",
+        photos: [
+          "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+        ],
+      },
+      {
+        dayNumber: "Day 2",
+        title: "Stargazing over Nomadic Berber Camps",
+        story: "Night fell like a heavy velvet curtain over the desert. With zero light pollution, millions of stars emerged, tracing constellations across the sky.",
+        photos: [
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_092026_dd05b805-ea0f-40b2-8c52-332b88502592.mp4",
+        ],
+      },
+      {
+        dayNumber: "Day 3",
+        title: "Valley of Roses & Cedar Trails",
+        story: "Leaving the dunes behind, we crossed winding mountain passes flanked by ancient mud-brick kasbahs. Fresh wild roses grew along stone aqueducts.",
+        photos: [
+          "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+        ],
+      },
     ]),
     destination: "Erg Chebbi, Merzouga",
     country: "Morocco",
@@ -120,7 +153,29 @@ export const FALLBACK_POSTS: FallbackPost[] = [
     `,
     featuredImage: "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1600&q=80",
     galleryImages: JSON.stringify([
-      "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1200&q=80",
+      {
+        dayNumber: "Day 1",
+        title: "Sailing the Tyrrhenian Waters & Positano Bay",
+        story: "We boarded a handcrafted wooden Gozzo at sunrise, gliding along sapphire waters toward Positano's cliffside village.",
+        photos: [
+          "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=600&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_092026_dd05b805-ea0f-40b2-8c52-332b88502592.mp4",
+        ],
+      },
+      {
+        dayNumber: "Day 2",
+        title: "Balustrades of Villa Cimbrone in Ravello",
+        story: "High above the coastal clouds, Ravello offered quiet sanctuary among marble statues and lemon groves.",
+        photos: [
+          "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=600&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+        ],
+      },
     ]),
     destination: "Amalfi Coast & Positano",
     country: "Italy",
@@ -141,3 +196,4 @@ export const FALLBACK_POSTS: FallbackPost[] = [
     author: FALLBACK_AUTHOR,
   },
 ];
+

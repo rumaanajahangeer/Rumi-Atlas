@@ -14,6 +14,14 @@ import {
   Send,
 } from "lucide-react";
 
+export interface DayChapter {
+  dayNumber: string;
+  title: string;
+  story: string;
+  photos: string[];
+  videos: string[];
+}
+
 interface PostData {
   id: string;
   title: string;
@@ -27,6 +35,7 @@ interface PostData {
   readingTime: number;
   category: { name: string };
   author: { name: string; avatar: string; bio: string };
+  dayChapters?: DayChapter[];
 }
 
 interface JournalReadingExperienceProps {
@@ -72,15 +81,15 @@ export default function JournalReadingExperience({
     setCommentMsg("");
   };
 
-  // Day-by-Day Chapters (No sub-headings - 1st videos, then images)
-  const dayChapters = [
+  const defaultDayChapters: DayChapter[] = [
     {
       dayNumber: "Day 1",
       title: "Arriving at the Golden Dunes of Merzouga",
       story: "We arrived at the edge of the Sahara as dusk began to painterly tint the sky in hues of deep violet and dusty rose. The air was crisp, scented with woodfire smoke and dry earth. Mounted on dromedaries, we ventured deep into the undulating dunes.",
       photos: [
         "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=600&q=80",
       ],
       videos: [
         "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
@@ -106,9 +115,34 @@ export default function JournalReadingExperience({
         "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
       ],
-      videos: [],
+      videos: [
+        "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+      ],
     },
   ];
+
+  let dynamicChapters: DayChapter[] = [];
+  if (post.galleryImages) {
+    try {
+      const parsed = typeof post.galleryImages === "string" ? JSON.parse(post.galleryImages) : post.galleryImages;
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.dayNumber) {
+        dynamicChapters = parsed.map((item: any, idx: number) => ({
+          dayNumber: item.dayNumber || `Day ${idx + 1}`,
+          title: item.title || `Chapter ${idx + 1}`,
+          story: item.story || "",
+          photos: Array.isArray(item.photos) ? item.photos : [],
+          videos: Array.isArray(item.videos) ? item.videos : [],
+        }));
+      }
+    } catch (e) {
+      console.error("Error parsing galleryImages as dayChapters:", e);
+    }
+  }
+
+  const dayChapters: DayChapter[] = (post.dayChapters && post.dayChapters.length > 0)
+    ? post.dayChapters
+    : (dynamicChapters.length > 0 ? dynamicChapters : defaultDayChapters);
+
 
   const suggestedPosts = allPosts.slice(0, 3);
 

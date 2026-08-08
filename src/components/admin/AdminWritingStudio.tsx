@@ -27,6 +27,14 @@ interface AdminWritingStudioProps {
   isEditing?: boolean;
 }
 
+interface DayChapterState {
+  dayNumber: string;
+  title: string;
+  story: string;
+  photos: string[];
+  videos: string[];
+}
+
 export default function AdminWritingStudio({
   initialData,
   isEditing = false,
@@ -48,23 +56,59 @@ export default function AdminWritingStudio({
   const [readingTime, setReadingTime] = useState(initialData?.readingTime || 5);
   const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? true);
 
-  // Day-by-Day Chapters List State (Unlimited Days)
-  const [days, setDays] = useState([
-    {
-      dayNumber: "Day 1",
-      title: "Arriving at the Golden Dunes of Merzouga",
-      story: "We arrived at the edge of the Sahara as dusk began to painterly tint the sky in hues of deep violet...",
-      photos: ["https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80"],
-      videos: ["https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4"],
-    },
-    {
-      dayNumber: "Day 2",
-      title: "Stargazing over Nomadic Berber Camps",
-      story: "Night fell like a heavy velvet curtain over the desert...",
-      photos: ["https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"],
-      videos: ["https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_092026_dd05b805-ea0f-40b2-8c52-332b88502592.mp4"],
-    },
-  ]);
+  // Day-by-Day Chapters List State (Unlimited Days & Media)
+  const [days, setDays] = useState<DayChapterState[]>(() => {
+
+    if (initialData?.galleryImages) {
+      try {
+        const parsed = typeof initialData.galleryImages === "string"
+          ? JSON.parse(initialData.galleryImages)
+          : initialData.galleryImages;
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.dayNumber) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error("Error loading initial days:", e);
+      }
+    }
+    return [
+      {
+        dayNumber: "Day 1",
+        title: "Arriving at the Golden Dunes of Merzouga",
+        story: "We arrived at the edge of the Sahara as dusk began to painterly tint the sky in hues of deep violet...",
+        photos: [
+          "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+        ],
+      },
+      {
+        dayNumber: "Day 2",
+        title: "Stargazing over Nomadic Berber Camps",
+        story: "Night fell like a heavy velvet curtain over the desert...",
+        photos: [
+          "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_092026_dd05b805-ea0f-40b2-8c52-332b88502592.mp4",
+        ],
+      },
+      {
+        dayNumber: "Day 3",
+        title: "Valley of Roses & Cedar Trails",
+        story: "Leaving the dunes behind, we crossed winding mountain passes flanked by ancient mud-brick kasbahs...",
+        photos: [
+          "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        ],
+        videos: [
+          "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260702_081127_0992a171-d3c6-4978-8213-0ec5df8b6d63.mp4",
+        ],
+      },
+    ];
+  });
+
 
   // Collapsible Sections Toggle State
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -420,11 +464,23 @@ export default function AdminWritingStudio({
                         <span>1st: {dayItem.dayNumber} Video Clips ({dayItem.videos.length})</span>
                       </div>
                       <div className="flex flex-wrap gap-2 items-center">
-                        {dayItem.videos.map((vUrl, vIdx) => (
-                          <div key={vIdx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-white/50 bg-black">
+                        {dayItem.videos.map((vUrl: string, vIdx: number) => (
+                          <div key={vIdx} className="relative w-28 h-18 rounded-lg overflow-hidden border border-white/50 bg-black group">
                             <video autoPlay loop muted playsInline className="w-full h-full object-cover">
                               <source src={vUrl} type="video/mp4" />
                             </video>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const copy = [...days];
+                                copy[i].videos = copy[i].videos.filter((_: string, idx: number) => idx !== vIdx);
+                                setDays(copy);
+                              }}
+                              className="absolute top-1 right-1 p-1 bg-rose-600/90 text-white rounded-full opacity-80 hover:opacity-100 transition-opacity"
+                              title="Delete video"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
                           </div>
                         ))}
                         <label className="h-16 px-4 rounded-lg border border-dashed border-[#8B5CF6] hover:bg-white/5 cursor-pointer flex items-center justify-center text-xs text-[#FDE047] space-x-1">
@@ -437,6 +493,23 @@ export default function AdminWritingStudio({
                             className="hidden"
                           />
                         </label>
+                        <input
+                          type="text"
+                          placeholder="Or paste video MP4 URL..."
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const val = (e.target as HTMLInputElement).value.trim();
+                              if (val) {
+                                const copy = [...days];
+                                copy[i].videos.push(val);
+                                setDays(copy);
+                                (e.target as HTMLInputElement).value = "";
+                              }
+                            }
+                          }}
+                          className="bg-white/5 border border-[#2E2352] rounded-lg px-3 py-2 text-xs text-white placeholder-stone-500 outline-none focus:border-[#8B5CF6] w-48"
+                        />
                       </div>
                     </div>
 
@@ -447,8 +520,22 @@ export default function AdminWritingStudio({
                         <span>2nd: {dayItem.dayNumber} Postcard Photos ({dayItem.photos.length})</span>
                       </div>
                       <div className="flex flex-wrap gap-2 items-center">
-                        {dayItem.photos.map((pUrl, pIdx) => (
-                          <img key={pIdx} src={pUrl} alt="Day photo" className="w-20 h-14 object-cover rounded-lg border border-white/50" />
+                        {dayItem.photos.map((pUrl: string, pIdx: number) => (
+                          <div key={pIdx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-white/50 group">
+                            <img src={pUrl} alt="Day photo" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const copy = [...days];
+                                copy[i].photos = copy[i].photos.filter((_: string, idx: number) => idx !== pIdx);
+                                setDays(copy);
+                              }}
+                              className="absolute top-1 right-1 p-1 bg-rose-600/90 text-white rounded-full opacity-80 hover:opacity-100 transition-opacity"
+                              title="Delete photo"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
                         ))}
                         <label className="h-14 px-4 rounded-lg border border-dashed border-[#8B5CF6] hover:bg-white/5 cursor-pointer flex items-center justify-center text-xs text-[#FDE047] space-x-1">
                           <Plus className="w-3.5 h-3.5" />
@@ -460,8 +547,27 @@ export default function AdminWritingStudio({
                             className="hidden"
                           />
                         </label>
+                        <input
+                          type="text"
+                          placeholder="Or paste photo URL..."
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const val = (e.target as HTMLInputElement).value.trim();
+                              if (val) {
+                                const copy = [...days];
+                                copy[i].photos.push(val);
+                                setDays(copy);
+                                (e.target as HTMLInputElement).value = "";
+                              }
+                            }
+                          }}
+                          className="bg-white/5 border border-[#2E2352] rounded-lg px-3 py-2 text-xs text-white placeholder-stone-500 outline-none focus:border-[#8B5CF6] w-48"
+                        />
                       </div>
                     </div>
+
+
                   </div>
                 ))}
 
