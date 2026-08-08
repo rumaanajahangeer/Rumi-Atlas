@@ -2,8 +2,9 @@ import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import ImagePlaceholder from "@/components/common/ImagePlaceholder";
 import { Search, Plus, Image as ImageIcon, Film } from "lucide-react";
@@ -16,9 +17,18 @@ export default async function AdminMediaLibraryPage() {
     redirect("/admin/login");
   }
 
-  const posts = await prisma.post.findMany({
-    select: { featuredImage: true, title: true },
-  });
+  const dbReady = isDatabaseConfigured();
+  let posts: any[] = [];
+
+  if (dbReady) {
+    try {
+      posts = await prisma.post.findMany({
+        select: { featuredImage: true, title: true },
+      });
+    } catch (e) {
+      console.error("Admin media library DB error:", e);
+    }
+  }
 
   const mediaImages = posts
     .filter((p) => p.featuredImage)
@@ -30,6 +40,8 @@ export default async function AdminMediaLibraryPage() {
       <AdminSidebar />
 
       <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-y-auto relative z-10">
+        {!dbReady && <DatabaseUnavailableCard />}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2E2352] pb-6 gap-4">
           <div>
             <h1 className="font-instrument italic text-4xl sm:text-5xl font-normal text-white">

@@ -1,7 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import JournalReadingExperience from "@/components/blog/JournalReadingExperience";
 
 export const revalidate = 0;
@@ -15,23 +16,37 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
 
   const { slug } = await params;
 
-  const post = await prisma.post.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      author: true,
-    },
-  });
+  let post: any = null;
+  let allPosts: any[] = [];
 
-  if (!post || !post.isPublished) {
+  if (isDatabaseConfigured()) {
+    try {
+      post = await prisma.post.findUnique({
+        where: { slug },
+        include: {
+          category: true,
+          author: true,
+        },
+      });
+
+      allPosts = await prisma.post.findMany({
+        where: { isPublished: true },
+        orderBy: { publishedAt: "desc" },
+        include: { category: true, author: true },
+      });
+    } catch {
+      post = FALLBACK_POSTS.find((p) => p.slug === slug) || null;
+      allPosts = FALLBACK_POSTS;
+    }
+  } else {
+    post = FALLBACK_POSTS.find((p) => p.slug === slug) || null;
+    allPosts = FALLBACK_POSTS;
+  }
+
+  if (!post || (post.isPublished === false)) {
     notFound();
   }
 
-  const allPosts = await prisma.post.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    include: { category: true, author: true },
-  });
 
   const formattedPost = {
     id: post.id,

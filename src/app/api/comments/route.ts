@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
+    }
+
     const body = await request.json();
     const { postId, content, authorName, authorEmail, authorAvatar, parentId } = body;
 
@@ -33,6 +37,10 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json([]);
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

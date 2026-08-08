@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 
 export async function GET() {
-  const posts = await prisma.post.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    take: 20,
-  });
+  let posts: any[] = [];
+
+  if (isDatabaseConfigured()) {
+    try {
+      posts = await prisma.post.findMany({
+        where: { isPublished: true },
+        orderBy: { publishedAt: "desc" },
+        take: 20,
+      });
+    } catch {
+      posts = FALLBACK_POSTS;
+    }
+  } else {
+    posts = FALLBACK_POSTS;
+  }
 
   const baseUrl = "https://rumiatlas.com";
 

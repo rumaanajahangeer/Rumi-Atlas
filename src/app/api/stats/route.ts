@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json({
+        totalBlogs: 0,
+        publishedBlogs: 0,
+        draftBlogs: 0,
+        totalComments: 0,
+        pendingComments: 0,
+        totalSubscribers: 0,
+        totalViews: 0,
+        recentBlogs: [],
+      });
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

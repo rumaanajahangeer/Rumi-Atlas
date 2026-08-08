@@ -3,8 +3,9 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import BlogActions from "@/components/admin/BlogActions";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import ImagePlaceholder from "@/components/common/ImagePlaceholder";
@@ -18,10 +19,19 @@ export default async function AdminBlogsPage() {
     redirect("/admin/login");
   }
 
-  const posts = await prisma.post.findMany({
-    include: { category: true, author: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const dbReady = isDatabaseConfigured();
+  let posts: any[] = [];
+
+  if (dbReady) {
+    try {
+      posts = await prisma.post.findMany({
+        include: { category: true, author: true },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (e) {
+      console.error("Admin blogs DB error:", e);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0813] text-[#F3E8FF] flex relative overflow-hidden font-sans">
@@ -29,6 +39,8 @@ export default async function AdminBlogsPage() {
       <AdminSidebar />
 
       <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-y-auto relative z-10">
+        {!dbReady && <DatabaseUnavailableCard />}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2E2352] pb-6 gap-4">
           <div>

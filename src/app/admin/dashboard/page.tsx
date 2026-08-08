@@ -3,8 +3,9 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import { BookOpen, FileText, Sparkles, PlusCircle, ArrowRight } from "lucide-react";
 
@@ -16,15 +17,27 @@ export default async function AdminDashboardPage() {
     redirect("/admin/login");
   }
 
-  const totalBlogs = await prisma.post.count();
-  const publishedBlogs = await prisma.post.count({ where: { isPublished: true } });
-  const draftBlogs = await prisma.post.count({ where: { isPublished: false } });
+  const dbReady = isDatabaseConfigured();
+  let totalBlogs = 0;
+  let publishedBlogs = 0;
+  let draftBlogs = 0;
+  let recentBlogs: any[] = [];
 
-  const recentBlogs = await prisma.post.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: { category: true },
-  });
+  if (dbReady) {
+    try {
+      totalBlogs = await prisma.post.count();
+      publishedBlogs = await prisma.post.count({ where: { isPublished: true } });
+      draftBlogs = await prisma.post.count({ where: { isPublished: false } });
+
+      recentBlogs = await prisma.post.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        include: { category: true },
+      });
+    } catch (e) {
+      console.error("Dashboard DB error:", e);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0813] text-[#F3E8FF] flex relative overflow-hidden font-sans">
@@ -32,6 +45,8 @@ export default async function AdminDashboardPage() {
       <AdminSidebar />
 
       <main className="flex-1 p-6 sm:p-10 space-y-10 overflow-y-auto relative z-10">
+        {!dbReady && <DatabaseUnavailableCard />}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2E2352] pb-6 gap-4">
           <div>

@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json(FALLBACK_POSTS);
+    }
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
     const categorySlug = searchParams.get("category");
@@ -61,7 +66,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
+    }
+
     const session = await getServerSession(authOptions);
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

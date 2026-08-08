@@ -1,21 +1,33 @@
 import { MetadataRoute } from "next";
 import { connection } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
 
   const baseUrl = "https://rumiatlas.com";
 
-  const posts = await prisma.post.findMany({
-    where: { isPublished: true },
-    select: { slug: true, updatedAt: true },
-  });
+  let posts: Array<{ slug: string; updatedAt: Date | string }> = [];
+
+  if (isDatabaseConfigured()) {
+    try {
+      posts = await prisma.post.findMany({
+        where: { isPublished: true },
+        select: { slug: true, updatedAt: true },
+      });
+    } catch {
+      posts = FALLBACK_POSTS.map((p) => ({ slug: p.slug, updatedAt: p.updatedAt }));
+    }
+  } else {
+    posts = FALLBACK_POSTS.map((p) => ({ slug: p.slug, updatedAt: p.updatedAt }));
+  }
 
   const postUrls = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
+    lastModified: new Date(post.updatedAt),
   }));
+
 
   return [
     { url: baseUrl, lastModified: new Date() },

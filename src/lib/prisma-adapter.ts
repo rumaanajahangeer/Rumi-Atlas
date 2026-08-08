@@ -1,6 +1,10 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 export function createPrismaAdapter() {
   const databaseUrl = process.env.DATABASE_URL;
 
@@ -24,3 +28,4 @@ export function createPrismaAdapter() {
 
   throw new Error("DATABASE_URL must use either a file: or libsql:// URL.");
 }
+

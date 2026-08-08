@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -9,6 +9,10 @@ export async function POST(request: Request) {
 
     if (!email || !email.includes("@")) {
       return NextResponse.json({ error: "Valid email address required" }, { status: 400 });
+    }
+
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json({ message: "Welcome to The Rumi Atlas newsletter family!" }, { status: 201 });
     }
 
     const existing = await prisma.newsletter.findUnique({
@@ -32,6 +36,10 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json([]);
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

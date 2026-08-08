@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { connection } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import InfiniteGallery from "@/components/effects/InfiniteGallery";
 import RumiAtlasLuxuryHero from "@/components/hero/RumiAtlasLuxuryHero";
@@ -13,20 +14,39 @@ export const revalidate = 0;
 export default async function HomePage() {
   await connection();
 
-  const latestPosts = await prisma.post.findMany({
-    where: { isPublished: true },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      featuredImage: true,
-      readingTime: true,
-      publishedAt: true,
-    },
-    orderBy: { publishedAt: "desc" },
-    take: 6,
-  });
+  let latestPosts: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    featuredImage: string;
+    readingTime: number | null;
+    publishedAt: Date | string | null;
+  }> = [];
+
+  if (isDatabaseConfigured()) {
+    try {
+      latestPosts = await prisma.post.findMany({
+        where: { isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featuredImage: true,
+          readingTime: true,
+          publishedAt: true,
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 6,
+      });
+    } catch {
+      latestPosts = FALLBACK_POSTS;
+    }
+  } else {
+    latestPosts = FALLBACK_POSTS;
+  }
+
 
   const galleryImages = latestPosts
     .filter((p) => p.featuredImage && p.featuredImage.startsWith("http"))

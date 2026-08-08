@@ -1,7 +1,8 @@
 import React from "react";
 import { connection } from "next/server";
 import NexumHero from "@/components/hero/NexumHero";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import BlogListClient from "@/components/blog/BlogListClient";
 
 export const revalidate = 0;
@@ -9,14 +10,25 @@ export const revalidate = 0;
 export default async function BlogListingPage() {
   await connection();
 
-  const posts = await prisma.post.findMany({
-    where: { isPublished: true },
-    orderBy: { publishedAt: "desc" },
-    include: {
-      category: true,
-      author: true,
-    },
-  });
+  let posts: any[] = [];
+
+  if (isDatabaseConfigured()) {
+    try {
+      posts = await prisma.post.findMany({
+        where: { isPublished: true },
+        orderBy: { publishedAt: "desc" },
+        include: {
+          category: true,
+          author: true,
+        },
+      });
+    } catch {
+      posts = FALLBACK_POSTS;
+    }
+  } else {
+    posts = FALLBACK_POSTS;
+  }
+
 
   const formattedPosts = posts.map((post) => ({
     id: post.id,

@@ -2,8 +2,9 @@ import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 
 export const revalidate = 0;
@@ -14,17 +15,28 @@ export default async function AdminCommentsPage() {
     redirect("/admin/login");
   }
 
-  const comments = await prisma.comment.findMany({
-    include: { post: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const dbReady = isDatabaseConfigured();
+  let comments: any[] = [];
+
+  if (dbReady) {
+    try {
+      comments = await prisma.comment.findMany({
+        include: { post: true },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (e) {
+      console.error("Admin comments DB error:", e);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-[#0B0813] text-[#F3E8FF] flex relative overflow-hidden font-sans">
+    <div className="min-h-[#0B0813] min-h-screen bg-[#0B0813] text-[#F3E8FF] flex relative overflow-hidden font-sans">
       <FloatingPetals />
       <AdminSidebar />
 
       <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-y-auto relative z-10">
+        {!dbReady && <DatabaseUnavailableCard />}
+
         <div className="border-b border-[#2E2352] pb-6">
           <h1 className="font-instrument italic text-4xl sm:text-5xl font-normal text-white">
             Comment Moderation ({comments.length})
