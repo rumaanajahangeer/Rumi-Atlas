@@ -55,7 +55,7 @@ export default async function AdminBlogsPage() {
             <input
               type="text"
               placeholder="Search journals by title..."
-              className="w-full bg-white/5 border border-[#2E2352] rounded-full px-5 py-2.5 pl-11 text-xs text-white placeholder-stone-500 outline-none focus:border-[#8B5CF6] shadow-sm"
+              className="w-full bg-white/5 border border-[#2E2352] rounded-full px-5 py-2.5 pl-11 text-xs text-[#F3E8FF] placeholder-stone-500 outline-none focus:border-[#8B5CF6] shadow-sm"
             />
             <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
           </div>
@@ -75,7 +75,7 @@ export default async function AdminBlogsPage() {
 
         {/* Magazine Cover Cards Grid (Dark Mode) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post) => (
+          {posts.map((post: any) => (
             <div
               key={post.id}
               className="liquid-glass rounded-3xl overflow-hidden border border-[#2E2352] shadow-xl flex flex-col justify-between tilt-card"
@@ -102,7 +102,7 @@ export default async function AdminBlogsPage() {
 
                 <div className="p-6 space-y-2">
                   <span className="text-[10px] uppercase tracking-widest text-[#FDE047] font-semibold">
-                    {post.category.name} • {post.readingTime || 5} min read
+                    {post.category?.name || "Expedition"} • {post.readingTime || 5} min read
                   </span>
                   <h3 className="font-instrument italic text-2xl font-normal text-white line-clamp-1">
                     {post.title}
