@@ -197,3 +197,50 @@ export const FALLBACK_POSTS: FallbackPost[] = [
   },
 ];
 
+export interface FallbackComment {
+  id: string;
+  content: string;
+  authorName: string;
+  authorEmail: string;
+  authorAvatar: string | null;
+  postId: string;
+  status: string;
+  createdAt: string;
+  post?: {
+    title: string;
+    slug: string;
+  };
+}
+
+export const FALLBACK_COMMENTS: FallbackComment[] = [
+  {
+    id: "comment-1",
+    content: "Reading this day-by-day entry felt like sitting quietly on a sunlit veranda with a cup of chamomile tea. Absolutely magical.",
+    authorName: "Clara Vance",
+    authorEmail: "clara.vance@expeditions.com",
+    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    postId: "fallback-1",
+    status: "APPROVED",
+    createdAt: "2026-05-02T14:30:00.000Z",
+    post: {
+      title: "Whispering Sands: A Journey Through the Sahara",
+      slug: "sahara-desert-palaces-merzouga",
+    },
+  },
+  {
+    id: "comment-2",
+    content: "The photos of Positano's cliffside balustrades at sunset are breathtaking! Adding Amalfi to my 2027 travel atlas.",
+    authorName: "Marcus Thorne",
+    authorEmail: "marcus.t@wanderlust.io",
+    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    postId: "fallback-2",
+    status: "APPROVED",
+    createdAt: "2026-06-29T09:15:00.000Z",
+    post: {
+      title: "Cliffside Elegance: Exploring Amalfi & Positano",
+      slug: "amalfi-coast-ravello-positano-guide",
+    },
+  },
+];
+
+

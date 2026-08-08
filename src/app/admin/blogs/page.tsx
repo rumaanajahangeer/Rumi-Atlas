@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import BlogActions from "@/components/admin/BlogActions";
@@ -30,7 +31,10 @@ export default async function AdminBlogsPage() {
       });
     } catch (e) {
       console.error("Admin blogs DB error:", e);
+      posts = FALLBACK_POSTS;
     }
+  } else {
+    posts = FALLBACK_POSTS;
   }
 
   return (

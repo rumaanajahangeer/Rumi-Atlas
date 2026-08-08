@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS, FALLBACK_COMMENTS } from "@/lib/fallback-data";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -7,14 +8,14 @@ export async function GET() {
   try {
     if (!isDatabaseConfigured()) {
       return NextResponse.json({
-        totalBlogs: 0,
-        publishedBlogs: 0,
+        totalBlogs: FALLBACK_POSTS.length,
+        publishedBlogs: FALLBACK_POSTS.filter((p) => p.isPublished).length,
         draftBlogs: 0,
-        totalComments: 0,
+        totalComments: FALLBACK_COMMENTS.length,
         pendingComments: 0,
-        totalSubscribers: 0,
-        totalViews: 0,
-        recentBlogs: [],
+        totalSubscribers: 12,
+        totalViews: 3600,
+        recentBlogs: FALLBACK_POSTS,
       });
     }
 

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_POSTS } from "@/lib/fallback-data";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import FloatingPetals from "@/components/effects/FloatingPetals";
@@ -36,8 +37,18 @@ export default async function AdminDashboardPage() {
       });
     } catch (e) {
       console.error("Dashboard DB error:", e);
+      totalBlogs = FALLBACK_POSTS.length;
+      publishedBlogs = FALLBACK_POSTS.filter((p) => p.isPublished).length;
+      draftBlogs = 0;
+      recentBlogs = FALLBACK_POSTS;
     }
+  } else {
+    totalBlogs = FALLBACK_POSTS.length;
+    publishedBlogs = FALLBACK_POSTS.filter((p) => p.isPublished).length;
+    draftBlogs = 0;
+    recentBlogs = FALLBACK_POSTS;
   }
+
 
   return (
     <div className="min-h-screen bg-[#0B0813] text-[#F3E8FF] flex relative overflow-hidden font-sans">

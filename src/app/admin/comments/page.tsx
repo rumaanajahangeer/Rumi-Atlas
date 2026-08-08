@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { FALLBACK_COMMENTS } from "@/lib/fallback-data";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import DatabaseUnavailableCard from "@/components/admin/DatabaseUnavailableCard";
 import FloatingPetals from "@/components/effects/FloatingPetals";
@@ -26,7 +27,10 @@ export default async function AdminCommentsPage() {
       });
     } catch (e) {
       console.error("Admin comments DB error:", e);
+      comments = FALLBACK_COMMENTS;
     }
+  } else {
+    comments = FALLBACK_COMMENTS;
   }
 
   return (
