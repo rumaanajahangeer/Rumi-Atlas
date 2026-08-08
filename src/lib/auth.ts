@@ -3,6 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+
+if (!nextAuthSecret) {
+  throw new Error("NEXTAUTH_SECRET must be set.");
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -63,5 +69,5 @@ export const authOptions: NextAuthOptions = {
     signIn: "/admin/login",
     error: "/admin/login",
   },
-  secret: process.env.NEXTAUTH_SECRET || "rumiatlas-super-secret-key-2026-production",
+  secret: nextAuthSecret,
 };

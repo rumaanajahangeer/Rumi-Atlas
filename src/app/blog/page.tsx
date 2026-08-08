@@ -1,4 +1,5 @@
 import React from "react";
+import { connection } from "next/server";
 import NexumHero from "@/components/hero/NexumHero";
 import { prisma } from "@/lib/prisma";
 import BlogListClient from "@/components/blog/BlogListClient";
@@ -6,6 +7,8 @@ import BlogListClient from "@/components/blog/BlogListClient";
 export const revalidate = 0;
 
 export default async function BlogListingPage() {
+  await connection();
+
   const posts = await prisma.post.findMany({
     where: { isPublished: true },
     orderBy: { publishedAt: "desc" },

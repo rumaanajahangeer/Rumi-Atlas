@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import InfiniteGallery from "@/components/effects/InfiniteGallery";
@@ -10,6 +11,8 @@ import { ArrowRight } from "lucide-react";
 export const revalidate = 0;
 
 export default async function HomePage() {
+  await connection();
+
   const latestPosts = await prisma.post.findMany({
     where: { isPublished: true },
     select: {

@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import JournalReadingExperience from "@/components/blog/JournalReadingExperience";
 
@@ -10,6 +11,8 @@ interface BlogDetailProps {
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailProps) {
+  await connection();
+
   const { slug } = await params;
 
   const post = await prisma.post.findUnique({

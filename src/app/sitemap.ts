@@ -1,7 +1,10 @@
 import { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
+
   const baseUrl = "https://rumiatlas.com";
 
   const posts = await prisma.post.findMany({
