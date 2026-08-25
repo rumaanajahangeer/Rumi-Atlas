@@ -50,7 +50,7 @@ export default async function HomePage() {
 
 
   const galleryImages = latestPosts
-    .filter((p) => p.featuredImage && p.featuredImage.startsWith("http"))
+    .filter((p) => p.featuredImage && (p.featuredImage.startsWith("http") || p.featuredImage.startsWith("data:") || p.featuredImage.startsWith("/")))
     .map((p) => ({
       src: p.featuredImage,
       alt: p.title,

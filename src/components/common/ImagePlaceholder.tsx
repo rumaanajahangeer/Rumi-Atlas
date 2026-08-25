@@ -19,7 +19,14 @@ export default function ImagePlaceholder({
   aspectRatio = "aspect-[4/3]",
   label = "Journal Image Placeholder",
 }: ImagePlaceholderProps) {
-  if (src && src.startsWith("http")) {
+  if (src && (src.startsWith("http") || src.startsWith("data:") || src.startsWith("/"))) {
+    if (src.startsWith("data:") || src.startsWith("/")) {
+      return (
+        <div className={`relative overflow-hidden ${aspectRatio} ${className}`}>
+          <img src={src} alt={alt} className="w-full h-full object-cover" />
+        </div>
+      );
+    }
     return (
       <div className={`relative overflow-hidden ${aspectRatio} ${className}`}>
         <Image src={src} alt={alt} fill className="object-cover" />
