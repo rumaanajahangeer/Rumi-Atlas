@@ -14,14 +14,15 @@ export default async function BlogListingPage() {
 
   if (isDatabaseConfigured()) {
     try {
-      posts = await prisma.post.findMany({
+      const dbPosts = await prisma.post.findMany({
         where: { isPublished: true },
-        orderBy: { publishedAt: "desc" },
+        orderBy: { createdAt: "desc" },
         include: {
           category: true,
           author: true,
         },
       });
+      posts = dbPosts.length > 0 ? dbPosts : FALLBACK_POSTS;
     } catch {
       posts = FALLBACK_POSTS;
     }

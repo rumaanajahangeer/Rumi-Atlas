@@ -123,18 +123,17 @@ export async function POST(request: Request) {
     if (!destination) destination = "Merzouga";
     if (!country) country = "Morocco";
 
-    // Fallback category if none specified
-    if (!categoryId) {
-      const firstCat = await prisma.category.findFirst();
-      if (firstCat) {
-        categoryId = firstCat.id;
-      } else {
-        const createdCat = await prisma.category.create({
-          data: { name: "Expeditions", slug: "expeditions" },
-        });
-        categoryId = createdCat.id;
-      }
+    // Category resolution
+    let category = categoryId ? await prisma.category.findUnique({ where: { id: categoryId } }) : null;
+    if (!category) {
+      category = await prisma.category.findFirst();
     }
+    if (!category) {
+      category = await prisma.category.create({
+        data: { name: "Expeditions", slug: "expeditions" },
+      });
+    }
+    categoryId = category.id;
 
     const generatedSlug =
       slug ||
@@ -146,11 +145,25 @@ export async function POST(request: Request) {
     const existing = await prisma.post.findUnique({ where: { slug: generatedSlug } });
     const finalSlug = existing ? `${generatedSlug}-${Date.now().toString().slice(-4)}` : generatedSlug;
 
-    let authorId = (session.user as { id?: string }).id;
-    if (!authorId) {
-      const admin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
-      authorId = admin?.id || "";
+    // Author resolution
+    let sessionUserId = (session.user as { id?: string }).id;
+    let author = sessionUserId ? await prisma.user.findUnique({ where: { id: sessionUserId } }) : null;
+    if (!author) {
+      author = await prisma.user.findFirst({ where: { role: "ADMIN" } });
     }
+    if (!author) {
+      author = await prisma.user.create({
+        data: {
+          name: session.user.name || "Editorial Curator",
+          email: session.user.email || "admin@rumiatlas.com",
+          passwordHash: "$2a$10$wK1n3r2.15gX7L1q7000000000000000000000000000000000000",
+          role: "ADMIN",
+          avatar: session.user.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+          bio: "Architectural photographer, travel curator, and editor of The Rumi Atlas.",
+        },
+      });
+    }
+    const authorId = author.id;
 
     const post = await prisma.post.create({
       data: {
@@ -176,7 +189,7 @@ export async function POST(request: Request) {
         isPublished: Boolean(isPublished),
         isFeatured: Boolean(isFeatured),
         isTrending: Boolean(isTrending),
-        publishedAt: isPublished ? new Date() : null,
+        publishedAt: Boolean(isPublished) ? new Date() : null,
         metaTitle: title,
         metaDescription: excerpt,
         ogImage: featuredImage,

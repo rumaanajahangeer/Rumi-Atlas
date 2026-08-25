@@ -193,6 +193,7 @@ export default function AdminWritingStudio({
           excerpt,
           content,
           featuredImage,
+          galleryImages: JSON.stringify(days),
           destination,
           country,
           readingTime,

@@ -98,31 +98,53 @@ export async function PUT(
       ogImage,
     } = body;
 
+    const existingPost = await prisma.post.findUnique({ where: { id } });
+    if (!existingPost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    let validCategoryId = categoryId;
+    if (validCategoryId) {
+      const cat = await prisma.category.findUnique({ where: { id: validCategoryId } });
+      if (!cat) {
+        validCategoryId = existingPost.categoryId;
+      }
+    }
+
+    const newPublishedAt = isPublished !== undefined
+      ? isPublished
+        ? existingPost.publishedAt || new Date()
+        : null
+      : existingPost.publishedAt;
+
     const post = await prisma.post.update({
       where: { id },
       data: {
-        title,
-        slug,
-        excerpt,
-        content,
-        featuredImage,
-        galleryImages: typeof galleryImages === "string" ? galleryImages : JSON.stringify(galleryImages || []),
-        destination,
-        country,
+        title: title || existingPost.title,
+        slug: slug || existingPost.slug,
+        excerpt: excerpt || existingPost.excerpt,
+        content: content || existingPost.content,
+        featuredImage: featuredImage || existingPost.featuredImage,
+        galleryImages: galleryImages !== undefined
+          ? (typeof galleryImages === "string" ? galleryImages : JSON.stringify(galleryImages))
+          : existingPost.galleryImages,
+        destination: destination || existingPost.destination,
+        country: country || existingPost.country,
         state,
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
         travelDate: travelDate ? new Date(travelDate) : undefined,
         tripDuration,
         budget,
-        categoryId,
-        tags: typeof tags === "string" ? tags : JSON.stringify(tags || []),
+        categoryId: validCategoryId,
+        tags: tags !== undefined ? (typeof tags === "string" ? tags : JSON.stringify(tags)) : undefined,
         tips,
         bestTimeToVisit,
         readingTime: readingTime ? parseInt(readingTime) : undefined,
-        isPublished,
+        isPublished: isPublished !== undefined ? Boolean(isPublished) : existingPost.isPublished,
         isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : undefined,
         isTrending: isTrending !== undefined ? Boolean(isTrending) : undefined,
+        publishedAt: newPublishedAt,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         metaTitle,
         metaDescription,

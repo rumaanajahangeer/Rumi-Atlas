@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   if (isDatabaseConfigured()) {
     try {
-      latestPosts = await prisma.post.findMany({
+      const dbPosts = await prisma.post.findMany({
         where: { isPublished: true },
         select: {
           id: true,
@@ -37,9 +37,10 @@ export default async function HomePage() {
           readingTime: true,
           publishedAt: true,
         },
-        orderBy: { publishedAt: "desc" },
+        orderBy: { createdAt: "desc" },
         take: 6,
       });
+      latestPosts = dbPosts.length > 0 ? dbPosts : FALLBACK_POSTS;
     } catch {
       latestPosts = FALLBACK_POSTS;
     }

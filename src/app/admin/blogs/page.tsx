@@ -25,10 +25,11 @@ export default async function AdminBlogsPage() {
 
   if (dbReady) {
     try {
-      posts = await prisma.post.findMany({
+      const dbPosts = await prisma.post.findMany({
         include: { category: true, author: true },
         orderBy: { createdAt: "desc" },
       });
+      posts = dbPosts.length > 0 ? dbPosts : FALLBACK_POSTS;
     } catch (e) {
       console.error("Admin blogs DB error:", e);
       posts = FALLBACK_POSTS;
