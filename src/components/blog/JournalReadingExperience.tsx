@@ -346,40 +346,7 @@ export default function JournalReadingExperience({
         ))}
       </section>
 
-      {/* 4. MAGNET MEMORY SCRAPBOOK */}
-      <section className="py-16 max-w-3xl mx-auto px-6 relative z-10">
-        <div className="liquid-glass p-8 rounded-3xl border border-[#2E2352] shadow-2xl text-center space-y-4">
-          <span className="text-xs uppercase tracking-[0.3em] text-[#FDE047] font-bold">
-            Signature Keepsake
-          </span>
-          <h2 className="font-instrument italic text-3xl text-white">🧲 Magnet Memory</h2>
-          <div className="w-28 h-28 mx-auto rounded-xl overflow-hidden border-2 border-white/90 shadow-lg p-1 bg-white/10 aspect-square">
-            <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=400&q=80" alt="Magnet keepsake" className="w-full h-full object-cover rounded-lg" />
-          </div>
-          <h3 className="font-serif italic text-lg text-white">Handcrafted Sahara Terracotta Magnet</h3>
-          <p className="text-xs text-stone-300 font-light leading-relaxed max-w-lg mx-auto">
-            "Picked from a small Artisan stall in Erfoud. Hand-painted by Berber potters using natural clay pigments."
-          </p>
-        </div>
-      </section>
 
-      {/* 5. FINAL REFLECTION ("UNTIL THE NEXT JOURNEY...") */}
-      <section className="py-20 max-w-4xl mx-auto px-6 relative z-10 text-center">
-        <div className="liquid-glass p-10 sm:p-12 rounded-3xl border border-[#2E2352] shadow-2xl space-y-6">
-          <span className="text-xs uppercase tracking-[0.3em] text-[#FDE047] font-bold">
-            Closing Reflection
-          </span>
-          <h2 className="font-instrument italic text-4xl sm:text-5xl text-white font-normal">
-            Until the Next Journey...
-          </h2>
-          <p className="font-serif italic text-sm text-stone-200 max-w-xl mx-auto leading-relaxed">
-            "As the sand dunes fade into the horizon behind us, I carry away the quiet beauty of early mornings and desert starscapes. Until we explore another corner of the world together."
-          </p>
-          <div className="font-instrument italic text-2xl text-[#FDE047] pt-2">
-            ~ Rumi
-          </div>
-        </div>
-      </section>
 
       {/* 6. CONTINUE READING */}
       <section className="py-20 max-w-6xl mx-auto px-6 relative z-10">
