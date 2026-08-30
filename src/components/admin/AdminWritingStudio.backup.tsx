@@ -1,9 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-// Remove the Vercel Blob client import.
-// Cloudinary uploads are handled directly with fetch().
 import TipTapEditor from "@/components/blog/TipTapEditor";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import {
@@ -47,8 +45,6 @@ export default function AdminWritingStudio({
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [lastSaved, setLastSaved] = useState("Just now");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
-  const [mediaError, setMediaError] = useState<string | null>(null);
 
   // Form State
   const [title, setTitle] = useState(initialData?.title || "Whispering Sands of Merzouga");
@@ -124,103 +120,48 @@ export default function AdminWritingStudio({
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-  const uploadMedia = async (file: File) => {
-    setUploadingMedia(true);
-    setMediaError(null);
 
-    try {
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-      if (!cloudName || !uploadPreset) {
-        throw new Error("Cloudinary media storage is not configured.");
-      }
-
-      const resourceType = file.type.startsWith("video/")
-        ? "video"
-        : "image";
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", uploadPreset);
-      formData.append("folder", "rumi-atlas");
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
-        {
-          method: "POST",
-          body: formData,
+  // Direct Local Image File Upload Handler
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, targetSetter: (val: string) => void) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          targetSetter(reader.result);
         }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-
-        throw new Error(
-          errorData?.error?.message || "Cloudinary upload failed."
-        );
-      }
-
-      const data = await response.json();
-
-      if (!data.secure_url) {
-        throw new Error("Cloudinary did not return a media URL.");
-      }
-
-      return data.secure_url as string;
-    } catch (error) {
-      console.error("Cloudinary upload failed:", error);
-
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Media upload failed. Please try again.";
-
-      setMediaError(message);
-      throw error;
-    } finally {
-      setUploadingMedia(false);
-    }
-  };
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetSetter: (val: string) => void) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    try {
-      targetSetter(await uploadMedia(file));
-    } catch {
-      // uploadMedia already exposes a safe, actionable error in the studio.
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleAddDayPhoto = async (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
+  const handleAddDayPhoto = (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
     const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    try {
-      const url = await uploadMedia(file);
-      setDays((currentDays) => currentDays.map((day, index) =>
-        index === dayIdx ? { ...day, photos: [...day.photos, url] } : day
-      ));
-    } catch {
-      // uploadMedia already exposes a safe, actionable error in the studio.
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const copy = [...days];
+          copy[dayIdx].photos.push(reader.result);
+          setDays(copy);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleAddDayVideo = async (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
+  const handleAddDayVideo = (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
     const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    try {
-      const url = await uploadMedia(file);
-      setDays((currentDays) => currentDays.map((day, index) =>
-        index === dayIdx ? { ...day, videos: [...day.videos, url] } : day
-      ));
-    } catch {
-      // uploadMedia already exposes a safe, actionable error in the studio.
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          const copy = [...days];
+          copy[dayIdx].videos.push(reader.result);
+          setDays(copy);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -266,12 +207,10 @@ export default function AdminWritingStudio({
         router.push("/admin/blogs");
         router.refresh();
       } else {
-        const response = await res.json().catch(() => null);
-        alert(response?.error || "Failed to save journal entry.");
+        alert("Failed to save journal entry.");
       }
-    } catch (error) {
-      console.error("Save journal error:", error);
-      alert("Unable to reach the server. Please try again.");
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -336,7 +275,7 @@ export default function AdminWritingStudio({
           <button
             type="button"
             onClick={() => handleSubmit(false)}
-            disabled={loading || uploadingMedia}
+            disabled={loading}
             className="px-4 py-2 rounded-full liquid-glass text-stone-300 hover:text-white text-xs uppercase tracking-wider font-semibold transition-all flex items-center space-x-1.5"
           >
             <Save className="w-3.5 h-3.5 text-[#FDE047]" />
@@ -346,8 +285,8 @@ export default function AdminWritingStudio({
           {isEditing && isPublished && (
             <button
               type="button"
-            onClick={() => handleSubmit(false)}
-            disabled={loading || uploadingMedia}
+              onClick={() => handleSubmit(false)}
+              disabled={loading}
               className="px-4 py-2 rounded-full liquid-glass text-amber-300 hover:bg-amber-500/20 text-xs uppercase tracking-wider font-semibold transition-all flex items-center space-x-1.5"
             >
               <EyeOff className="w-3.5 h-3.5" />
@@ -358,7 +297,7 @@ export default function AdminWritingStudio({
           <button
             type="button"
             onClick={() => handleSubmit(true)}
-            disabled={loading || uploadingMedia}
+            disabled={loading}
             className="px-5 py-2 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs uppercase tracking-wider font-semibold shadow-xl transition-all flex items-center space-x-1.5"
           >
             <Send className="w-3.5 h-3.5" />
@@ -381,8 +320,6 @@ export default function AdminWritingStudio({
             R
           </div>
         </div>
-        {mediaError && <p role="alert" className="w-full text-right text-xs text-rose-300">{mediaError}</p>}
-        {uploadingMedia && <p className="w-full text-right text-xs text-[#FDE047]">Uploading media…</p>}
       </header>
 
       {/* WORKSPACE */}
@@ -455,7 +392,6 @@ export default function AdminWritingStudio({
                       <input
                         type="file"
                         accept="image/*"
-                        disabled={uploadingMedia}
                         onChange={(e) => handleFileUpload(e, setFeaturedImage)}
                         className="hidden"
                       />
@@ -554,7 +490,6 @@ export default function AdminWritingStudio({
                           <input
                             type="file"
                             accept="video/*"
-                            disabled={uploadingMedia}
                             onChange={(e) => handleAddDayVideo(e, i)}
                             className="hidden"
                           />
@@ -609,7 +544,6 @@ export default function AdminWritingStudio({
                           <input
                             type="file"
                             accept="image/*"
-                            disabled={uploadingMedia}
                             onChange={(e) => handleAddDayPhoto(e, i)}
                             className="hidden"
                           />
@@ -753,4 +687,3 @@ export default function AdminWritingStudio({
     </div>
   );
 }
-

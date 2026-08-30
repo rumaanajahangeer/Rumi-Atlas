@@ -272,9 +272,6 @@ export default function JournalReadingExperience({
             <img src={post.featuredImage} alt="Trip overview" className="w-full h-full object-cover" />
           </div>
           <div className="w-full md:w-1/2 space-y-4">
-            <span className="px-3 py-1 rounded-full bg-[#8B5CF6]/30 border border-[#8B5CF6] text-[#FDE047] text-[10px] uppercase tracking-widest font-bold">
-              3-Day Expedition
-            </span>
             <h2 className="font-instrument italic text-3xl sm:text-4xl text-white">
               Journey Overview
             </h2>
