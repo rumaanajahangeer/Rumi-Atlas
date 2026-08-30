@@ -30,10 +30,13 @@ interface TipTapEditorProps {
 export default function TipTapEditor({ content, onChange }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // StarterKit v3 includes Link. Configure it only once below.
+        link: false,
+      }),
       ImageExtension.configure({
         inline: false,
-        allowBase64: true,
+        allowBase64: false,
       }),
       LinkExtension.configure({
         openOnClick: false,

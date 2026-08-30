@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import TipTapEditor from "@/components/blog/TipTapEditor";
 import FloatingPetals from "@/components/effects/FloatingPetals";
 import {
@@ -45,6 +46,8 @@ export default function AdminWritingStudio({
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [lastSaved, setLastSaved] = useState("Just now");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [mediaError, setMediaError] = useState<string | null>(null);
 
   // Form State
   const [title, setTitle] = useState(initialData?.title || "Whispering Sands of Merzouga");
@@ -121,47 +124,76 @@ export default function AdminWritingStudio({
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Direct Local Image File Upload Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, targetSetter: (val: string) => void) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          targetSetter(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
+  const uploadMedia = async (file: File) => {
+    setUploadingMedia(true);
+    setMediaError(null);
+
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const blob = await upload(`rumi-atlas/${Date.now()}-${safeName}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
+        multipart: true,
+      });
+      return blob.url;
+    } catch (error) {
+      console.warn("Vercel Blob upload unconfigured or failed, reading media locally:", error);
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result);
+          } else {
+            reject(new Error("Failed to read media file"));
+          }
+        };
+        reader.onerror = () => reject(new Error("Failed to read media file"));
+        reader.readAsDataURL(file);
+      });
+    } finally {
+      setUploadingMedia(false);
     }
   };
 
-  const handleAddDayPhoto = (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetSetter: (val: string) => void) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          const copy = [...days];
-          copy[dayIdx].photos.push(reader.result);
-          setDays(copy);
-        }
-      };
-      reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file) return;
+
+    try {
+      targetSetter(await uploadMedia(file));
+    } catch {
+      // uploadMedia already exposes a safe, actionable error in the studio.
     }
   };
 
-  const handleAddDayVideo = (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
+  const handleAddDayPhoto = async (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          const copy = [...days];
-          copy[dayIdx].videos.push(reader.result);
-          setDays(copy);
-        }
-      };
-      reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file) return;
+
+    try {
+      const url = await uploadMedia(file);
+      setDays((currentDays) => currentDays.map((day, index) =>
+        index === dayIdx ? { ...day, photos: [...day.photos, url] } : day
+      ));
+    } catch {
+      // uploadMedia already exposes a safe, actionable error in the studio.
+    }
+  };
+
+  const handleAddDayVideo = async (e: React.ChangeEvent<HTMLInputElement>, dayIdx: number) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    try {
+      const url = await uploadMedia(file);
+      setDays((currentDays) => currentDays.map((day, index) =>
+        index === dayIdx ? { ...day, videos: [...day.videos, url] } : day
+      ));
+    } catch {
+      // uploadMedia already exposes a safe, actionable error in the studio.
     }
   };
 
@@ -207,10 +239,12 @@ export default function AdminWritingStudio({
         router.push("/admin/blogs");
         router.refresh();
       } else {
-        alert("Failed to save journal entry.");
+        const response = await res.json().catch(() => null);
+        alert(response?.error || "Failed to save journal entry.");
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Save journal error:", error);
+      alert("Unable to reach the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -275,7 +309,7 @@ export default function AdminWritingStudio({
           <button
             type="button"
             onClick={() => handleSubmit(false)}
-            disabled={loading}
+            disabled={loading || uploadingMedia}
             className="px-4 py-2 rounded-full liquid-glass text-stone-300 hover:text-white text-xs uppercase tracking-wider font-semibold transition-all flex items-center space-x-1.5"
           >
             <Save className="w-3.5 h-3.5 text-[#FDE047]" />
@@ -285,8 +319,8 @@ export default function AdminWritingStudio({
           {isEditing && isPublished && (
             <button
               type="button"
-              onClick={() => handleSubmit(false)}
-              disabled={loading}
+            onClick={() => handleSubmit(false)}
+            disabled={loading || uploadingMedia}
               className="px-4 py-2 rounded-full liquid-glass text-amber-300 hover:bg-amber-500/20 text-xs uppercase tracking-wider font-semibold transition-all flex items-center space-x-1.5"
             >
               <EyeOff className="w-3.5 h-3.5" />
@@ -297,7 +331,7 @@ export default function AdminWritingStudio({
           <button
             type="button"
             onClick={() => handleSubmit(true)}
-            disabled={loading}
+            disabled={loading || uploadingMedia}
             className="px-5 py-2 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs uppercase tracking-wider font-semibold shadow-xl transition-all flex items-center space-x-1.5"
           >
             <Send className="w-3.5 h-3.5" />
@@ -320,6 +354,8 @@ export default function AdminWritingStudio({
             R
           </div>
         </div>
+        {mediaError && <p role="alert" className="w-full text-right text-xs text-rose-300">{mediaError}</p>}
+        {uploadingMedia && <p className="w-full text-right text-xs text-[#FDE047]">Uploading media…</p>}
       </header>
 
       {/* WORKSPACE */}
@@ -392,6 +428,7 @@ export default function AdminWritingStudio({
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={uploadingMedia}
                         onChange={(e) => handleFileUpload(e, setFeaturedImage)}
                         className="hidden"
                       />
@@ -490,6 +527,7 @@ export default function AdminWritingStudio({
                           <input
                             type="file"
                             accept="video/*"
+                            disabled={uploadingMedia}
                             onChange={(e) => handleAddDayVideo(e, i)}
                             className="hidden"
                           />
@@ -544,6 +582,7 @@ export default function AdminWritingStudio({
                           <input
                             type="file"
                             accept="image/*"
+                            disabled={uploadingMedia}
                             onChange={(e) => handleAddDayPhoto(e, i)}
                             className="hidden"
                           />

@@ -2,14 +2,25 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 
 export function isDatabaseConfigured(): boolean {
-  return Boolean(
-    process.env.TURSO_DATABASE_URL &&
-    process.env.TURSO_AUTH_TOKEN
-  );
+  const tursoUrl = getTursoDatabaseUrl();
+  const tursoConfigured = Boolean(tursoUrl && process.env.TURSO_AUTH_TOKEN);
+
+  // Vercel's filesystem is ephemeral, so a deployment must use Turso. The
+  // local adapter below remains available for development as documented.
+  return tursoConfigured || process.env.VERCEL !== "1";
+}
+
+/**
+ * `DATABASE_URL` is the standard Prisma/Turso variable and is what existing
+ * deployments use. Keep `TURSO_DATABASE_URL` as an explicit alias so either
+ * documented configuration works without silently disabling writes.
+ */
+function getTursoDatabaseUrl(): string | undefined {
+  return process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL;
 }
 
 export function createPrismaAdapter() {
-  const tursoUrl = process.env.TURSO_DATABASE_URL;
+  const tursoUrl = getTursoDatabaseUrl();
   const tursoAuthToken = process.env.TURSO_AUTH_TOKEN;
 
   // Production: use Turso
