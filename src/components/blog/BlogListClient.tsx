@@ -71,11 +71,7 @@ export default function BlogListClient({ posts }: BlogListClientProps) {
 
                   {/* Card Content */}
                   <div className="p-6 space-y-3">
-                    <div className="flex items-center justify-between text-[11px] text-[#A78BFA] font-mono">
-                      <span className="flex items-center space-x-1">
-                        <Compass className="w-3.5 h-3.5 text-[#FDE047]" />
-                        <span>{post.destination}, {post.country}</span>
-                      </span>
+                    <div className="flex items-center justify-end text-[11px] text-[#A78BFA] font-mono">
                       <span className="flex items-center space-x-1">
                         <Clock className="w-3 h-3 text-[#FDE047]" />
                         <span>{post.readingTime || 5} min</span>
