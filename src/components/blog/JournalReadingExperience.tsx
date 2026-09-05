@@ -150,65 +150,7 @@ export default function JournalReadingExperience({
     <div className="relative bg-[#0B0813] text-[#F3E8FF] min-h-screen overflow-hidden select-none font-sans">
       <FloatingPetals />
 
-      {/* FIXED NAVIGATION BAR */}
-      <header className="fixed top-0 left-0 right-0 z-50 py-4 px-6 sm:px-10 liquid-glass border-b border-[#2E2352] shadow-2xl bg-[#0B0813]/90">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex flex-col">
-            <span className="font-instrument italic text-2xl sm:text-3xl font-normal text-white">
-              The Rumi Atlas
-            </span>
-            <span className="text-[9px] tracking-[0.3em] text-[#FDE047] uppercase font-sans font-medium -mt-1">
-              "Every Journey Becomes a Story."
-            </span>
-          </Link>
 
-          <div className="flex items-center space-x-6">
-            <nav className="hidden lg:flex items-center space-x-6 text-xs uppercase tracking-widest font-medium text-white/90">
-              <Link href="/" className="hover:text-[#FDE047] transition-colors">Home</Link>
-              <Link href="/blog" className="hover:text-[#FDE047] transition-colors">Journal Library</Link>
-              <Link href="/about" className="hover:text-[#FDE047] transition-colors">About</Link>
-            </nav>
-
-            <div className="relative">
-              <button
-                onClick={() => setIsLibraryOpen(!isLibraryOpen)}
-                className="flex items-center space-x-2 px-5 py-2.5 rounded-full bg-[#8B5CF6] text-white text-xs font-semibold uppercase tracking-wider shadow-lg hover:bg-[#7C3AED] transition-all"
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Browse Journals</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isLibraryOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              <AnimatePresence>
-                {isLibraryOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-3 w-72 liquid-glass border border-[#2E2352] rounded-3xl p-4 shadow-2xl space-y-2 z-50 bg-[#130F24]"
-                  >
-                    <span className="text-[10px] uppercase tracking-widest text-[#FDE047] font-bold px-3 block">
-                      Journal Entries
-                    </span>
-                    <div className="divide-y divide-[#2E2352] max-h-64 overflow-y-auto">
-                      {allPosts.map((entry) => (
-                        <Link
-                          key={entry.id}
-                          href={`/blog/${entry.slug}`}
-                          onClick={() => setIsLibraryOpen(false)}
-                          className="block py-2.5 px-3 rounded-2xl hover:bg-white/10 text-xs font-serif italic text-white hover:text-[#FDE047] transition-colors"
-                        >
-                          {entry.title}
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* 1. FULLSCREEN HERO */}
       <section className="relative h-screen min-h-[720px] flex flex-col justify-between overflow-hidden pt-24">
